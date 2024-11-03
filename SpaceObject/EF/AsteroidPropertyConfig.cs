@@ -9,7 +9,7 @@ namespace SpaceObject.EF
         public void Configure(EntityTypeBuilder<AsteroidProperty> builder)
         {
             builder.ToTable("asteroid_properties").HasKey(ap => ap.id);
-            builder.Property(ap => ap.idAsteroidItem).HasColumnName("FK_isAsteroidItem");
+            builder.Property(ap => ap.idAsteroidItem).HasColumnName("FK_IdAsteroidItem");
             builder.HasIndex(ap => ap.idAsteroidItem).IsUnique().HasDatabaseName("IX_AsteroidProperty_idAsteroidItem");
         }
     }

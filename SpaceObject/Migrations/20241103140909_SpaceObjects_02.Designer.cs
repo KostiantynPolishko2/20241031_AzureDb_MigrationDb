@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpaceObject.EF;
 
@@ -10,9 +11,11 @@ using SpaceObject.EF;
 namespace SpaceObject.Migrations
 {
     [DbContext(typeof(SpaceObjectContext))]
-    partial class SpaceObjectContextModelSnapshot : ModelSnapshot
+    [Migration("20241103140909_SpaceObjects_02")]
+    partial class SpaceObjects_02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

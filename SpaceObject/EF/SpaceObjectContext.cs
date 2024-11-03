@@ -5,7 +5,9 @@ namespace SpaceObject.EF
 {
     public class SpaceObjectContext : DbContext
     {
-        public DbSet<AsteroidItem> spaceItems { get; set; } = null!;
+        public DbSet<AsteroidItem> asteroidItems { get; set; } = null!;
+        public DbSet<AsteroidProperty> asteroidProperties { get; set; } = null!;
+
         public SpaceObjectContext(DbContextOptions<SpaceObjectContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -10,7 +10,7 @@ namespace SpaceObject.Entities
         public int id { get; set; }
         public int size { get; set; }
         public float weight { get; set; }
-        public int speed { get; set; }
+        public float speed { get; set; }
         public int idAsteroidItem { get; set; }
         public AsteroidItem? asteroidItem { get; set; }
     }
