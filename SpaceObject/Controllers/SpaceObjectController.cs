@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using SpaceObject.DTO;
 using SpaceObject.EF;
 using SpaceObject.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.ComponentModel.DataAnnotations;
 
 namespace SpaceObject.Controllers
 {
@@ -23,7 +22,7 @@ namespace SpaceObject.Controllers
         }
 
         [HttpGet("asteroiditems", Name = "GetAsteroidItems")]
-        public ActionResult<IEnumerable<AsteroidItem>> GetAsteroidItems() 
+        public ActionResult<IEnumerable<AsteroidItemDto>> GetAsteroidItems() 
         {
             try
             {
@@ -33,7 +32,10 @@ namespace SpaceObject.Controllers
                     throw new Exception("AsteroidItems no records in db");
                 }
 
-                return Ok(data);
+                IMapper mapper = new MapperConfiguration( c => c.CreateMap<AsteroidItem, AsteroidItemDto>()).CreateMapper();
+                var asteroidItemsDto = mapper.Map<IEnumerable<AsteroidItem>, IEnumerable<AsteroidItemDto>>(data);
+
+                return Ok(asteroidItemsDto);
             }
             catch (Exception ex) 
             { 
@@ -41,22 +43,45 @@ namespace SpaceObject.Controllers
             }
         }
 
-        [HttpGet("asteroidsinfo", Name = "GetAsteroidsInfo")]
-        public ActionResult<IEnumerable<AsteroidInfoDto>> GetAsteroidsInfo()
+        [HttpGet("asteroidsinfo/{name}", Name = "GetAsteroidsInfo")]
+        public ActionResult<AsteroidInfoDto> GetAsteroidsInfo([FromRoute] string name)
         {         
             try
             {
-                IEnumerable<AsteroidInfoDto> asteroids_dto = context.asteroidItems.Join
+                var item = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.name.Equals(name.ToLower()));
+
+                if (item == null)
+                {
+                    throw new Exception($"AsteroidInfo of {name}  no records in db");
+                }
+
+                var asteroidItemDto = new AsteroidInfoDto(item.asteroidProperty) { name = item.name, category = item.type };
+
+                return Ok(asteroidItemDto);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("asteroids/{type}", Name = "GetAsteroidsInfoByType")]
+        public ActionResult<IEnumerable<AsteroidInfoDto>> GetAsteroidsInfoByType([FromRoute][Required] string type)
+        {
+            try
+            {
+                IEnumerable<AsteroidInfoDto>? asteroids_dto = context.asteroidItems.Where(c => c.type.Equals(type.ToLower()) ).Join
                     (
                         context.asteroidProperties,
                         ai => ai.id,
                         ap => ap.idAsteroidItem,
-                        (ai, ap) => new AsteroidInfoDto(ap){ name = ai.name, category = ai.type }
+                        (ai, ap) => new AsteroidInfoDto(ap) { name = ai.name, category = ai.type }
                     );
 
-                if (asteroids_dto == null)
+                if (asteroids_dto.Count() == 0)
                 {
-                    throw new Exception("AsteroidItems no records in db");
+                    throw new Exception($"Asteroids with class {type} no records in db");
                 }
 
                 return Ok(asteroids_dto);
@@ -65,7 +90,6 @@ namespace SpaceObject.Controllers
             {
                 return NotFound(ex.Message);
             }
-
         }
     }
 }

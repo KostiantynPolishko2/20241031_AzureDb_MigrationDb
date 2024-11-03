@@ -27,9 +27,9 @@ namespace SpaceObject.DTO
 
         public AsteroidInfoDto() { }
 
-        public AsteroidInfoDto(AsteroidProperty asteroidProperty)
+        public AsteroidInfoDto(AsteroidProperty? asteroidProperty)
         {
-            this.size = asteroidProperty.size;
+            this.size = asteroidProperty!.size;
             this.weight = asteroidProperty.weight;
             this.speed = asteroidProperty.speed;
         }
