@@ -43,7 +43,7 @@ namespace SpaceObject.Controllers
             }
         }
 
-        [HttpGet("asteroidsinfo/{name}", Name = "GetAsteroidsInfo")]
+        [HttpGet("asteroid/{name}", Name = "GetAsteroidsInfo")]
         public ActionResult<AsteroidInfoDto> GetAsteroidsInfo([FromRoute] string name)
         {         
             try
@@ -89,6 +89,55 @@ namespace SpaceObject.Controllers
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPost("asteroid", Name = "PostAsteroid")]
+        public IActionResult PostAsteroid([FromQuery] [Required] string name, string type, [FromBody] AsteroidProperty asteroidProperty)
+        {
+            try
+            {
+                context.asteroidItems.Add(new AsteroidItem { name = name, type = type });
+                context.SaveChanges();
+
+                int asteroidItemId = context.asteroidItems.FirstOrDefault(ai => ai.name.Equals(name.ToLower()))!.id;
+                if (asteroidItemId == -1)
+                {
+                    throw new Exception($"Asteroids {name} no records in db");
+                }
+
+                asteroidProperty.idAsteroidItem = asteroidItemId;
+                context.asteroidProperties.Add(asteroidProperty);
+                context.SaveChanges();
+
+                return Ok($"asteroid {name}, class {type}, recorded to db");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpDelete("asteroid/{name}", Name = "DeleteAsteroidByName")]
+        public IActionResult DeleteAsteroidByName([FromRoute] string name)
+        {
+            try
+            {
+                var item = context.asteroidItems.FirstOrDefault(c => c.name.Equals(name.ToLower()));
+                if(item == null)
+                {
+                    throw new Exception($"{name} no record in db");
+                }
+
+                context.asteroidItems.Remove(item);
+                context.SaveChanges();
+
+                return Ok($"{name} deleted from db");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
