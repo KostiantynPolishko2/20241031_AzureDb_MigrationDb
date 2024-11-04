@@ -1,4 +1,4 @@
-﻿using AuthJWTAspNetWeb.Roles;
+﻿using Authorization.Roles;
 using Authorization.Entities;
 using Authorization.Responces;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Text;
 
 
-namespace AuthJWTAspNetWeb.Controllers
+namespace Authorization.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

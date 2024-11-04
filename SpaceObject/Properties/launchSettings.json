@@ -35,6 +35,11 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "JWT": {
+        "ValidIssuer": "http://localhost:7185",
+        "ValidAudience": "http://localhost:4200",
+        "Secret": "JWTAuthenticationHIGHsecuredPasswordVVVp1OH7Xzyr"
       }
     }
   }

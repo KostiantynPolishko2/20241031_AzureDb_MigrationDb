@@ -1,4 +1,4 @@
-USE [authdata]
+USE [space_objects_auth]
 
 SELECT * FROM [dbo].[AspNetRoleClaims];
 

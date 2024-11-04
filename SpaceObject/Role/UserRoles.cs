@@ -1,4 +1,4 @@
-﻿namespace Authorization.Roles
+﻿namespace SpaceObject.Roles
 {
     public static class UserRoles
     {
