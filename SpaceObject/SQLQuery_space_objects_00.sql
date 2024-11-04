@@ -17,4 +17,5 @@ SELECT * FROM [dbo].[asteroid_properties];
 
 SELECT [ai].[name], 'class ' + [ai].[type] AS [category], [ap].[size], [ap].[weight], [ap].[speed] FROM [dbo].[asteroid_items] AS [ai]
 INNER JOIN [dbo].[asteroid_properties] AS [ap]
-ON [ai].[id] = [ap].[FK_IdAsteroidItem];
+ON [ai].[id] = [ap].[FK_IdAsteroidItem]
+WHERE [ai].[type] = 'c'

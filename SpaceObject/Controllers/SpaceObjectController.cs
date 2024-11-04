@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SpaceObject.DTO;
@@ -119,13 +120,48 @@ namespace SpaceObject.Controllers
 
         }
 
+        [HttpPatch("asteroid/{name}", Name = "PatchAsteroid")]
+        public IActionResult PatchAsteroid([FromRoute] string name, [FromBody] JsonPatchDocument<AsteroidProperty> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            var asteroidItem = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.name.Equals(name.ToLower()));
+            if (asteroidItem == null)
+            {
+                return NotFound($"asteroid {name} no record in db");
+            }
+
+            var asteroidProperty = asteroidItem!.asteroidProperty;
+            if (asteroidProperty == null)
+            {
+                return NotFound($"asteroids' properties {name} no record in db");
+            }
+
+            // Apply the patch document to the asteroid
+            patchDoc.ApplyTo(asteroidProperty, ModelState);
+
+            // Validate the model after applying the patch
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            context.asteroidProperties.Update(asteroidProperty);
+            context.SaveChanges();
+
+            return Ok($"asteroid {name} properties record updated in db");
+        }
+
         [HttpDelete("asteroid/{name}", Name = "DeleteAsteroidByName")]
         public IActionResult DeleteAsteroidByName([FromRoute] string name)
         {
             try
             {
                 var item = context.asteroidItems.FirstOrDefault(c => c.name.Equals(name.ToLower()));
-                if(item == null)
+                if (item == null)
                 {
                     throw new Exception($"{name} no record in db");
                 }
