@@ -14,8 +14,6 @@ SELECT * FROM [dbo].[AspNetUserRoles];
 
 SELECT * FROM [dbo].[AspNetUsers];
 
-SELECT * FROM [dbo].[cars];
-
 --DELETE FROM [dbo].[AspNetUsers];
 
 --DELETE FROM [dbo].[AspNetUsers] WHERE UserName='adminpoliskon4';
