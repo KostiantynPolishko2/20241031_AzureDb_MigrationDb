@@ -49,14 +49,14 @@ namespace SpaceObject.Controllers
         {         
             try
             {
-                var item = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.name.Equals(name.ToLower()));
+                var item = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.Name.Equals(name.ToLower()));
 
                 if (item == null)
                 {
                     throw new Exception($"AsteroidInfo of {name}  no records in db");
                 }
 
-                var asteroidItemDto = new AsteroidInfoDto(item.asteroidProperty) { name = item.name, category = item.type };
+                var asteroidItemDto = new AsteroidInfoDto(item.asteroidProperty) { Name = item.Name, Category = item.Type };
 
                 return Ok(asteroidItemDto);
             }
@@ -72,12 +72,12 @@ namespace SpaceObject.Controllers
         {
             try
             {
-                IEnumerable<AsteroidInfoDto>? asteroids_dto = context.asteroidItems.Where(c => c.type.Equals(type.ToLower()) ).Join
+                IEnumerable<AsteroidInfoDto>? asteroids_dto = context.asteroidItems.Where(c => c.Type.Equals(type.ToLower()) ).Join
                     (
                         context.asteroidProperties,
                         ai => ai.id,
                         ap => ap.idAsteroidItem,
-                        (ai, ap) => new AsteroidInfoDto(ap) { name = ai.name, category = ai.type }
+                        (ai, ap) => new AsteroidInfoDto(ap) { Name = ai.Name, Category = ai.Type }
                     );
 
                 if (asteroids_dto.Count() == 0)
@@ -98,10 +98,10 @@ namespace SpaceObject.Controllers
         {
             try
             {
-                context.asteroidItems.Add(new AsteroidItem { name = name, type = type });
+                context.asteroidItems.Add(new AsteroidItem { Name = name, Type = type });
                 context.SaveChanges();
 
-                int asteroidItemId = context.asteroidItems.FirstOrDefault(ai => ai.name.Equals(name.ToLower()))!.id;
+                int asteroidItemId = context.asteroidItems.FirstOrDefault(ai => ai.Name.Equals(name.ToLower()))!.id;
                 if (asteroidItemId == -1)
                 {
                     throw new Exception($"Asteroids {name} no records in db");
@@ -121,38 +121,41 @@ namespace SpaceObject.Controllers
         }
 
         [HttpPatch("asteroid/{name}", Name = "PatchAsteroid")]
-        public IActionResult PatchAsteroid([FromRoute] string name, [FromBody] JsonPatchDocument<AsteroidProperty> patchDoc)
+        public IActionResult PatchAsteroid([FromRoute][Required] string name, [FromBody] JsonPatchDocument<AsteroidProperty> patchDoc)
         {
-            if (patchDoc == null)
+            try
             {
-                return BadRequest();
+                var asteroidItem = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.Name.Equals(name.ToLower()));
+                if (asteroidItem == null)
+                {
+                    return NotFound($"asteroid {name} no record in db");
+                }
+
+                var asteroidProperty = asteroidItem!.asteroidProperty;
+                if (asteroidProperty == null)
+                {
+                    return NotFound($"asteroids' properties {name} no record in db");
+                }
+
+                // Apply the patch document to the asteroid
+                patchDoc.ApplyTo(asteroidProperty, ModelState);
+
+                // Validate the model after applying the patch
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                context.asteroidProperties.Update(asteroidProperty);
+                context.SaveChanges();
+
+                return Ok($"asteroid {name} properties record updated in db");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            var asteroidItem = context.asteroidItems.Include(ai => ai.asteroidProperty).FirstOrDefault(c => c.name.Equals(name.ToLower()));
-            if (asteroidItem == null)
-            {
-                return NotFound($"asteroid {name} no record in db");
-            }
-
-            var asteroidProperty = asteroidItem!.asteroidProperty;
-            if (asteroidProperty == null)
-            {
-                return NotFound($"asteroids' properties {name} no record in db");
-            }
-
-            // Apply the patch document to the asteroid
-            patchDoc.ApplyTo(asteroidProperty, ModelState);
-
-            // Validate the model after applying the patch
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            context.asteroidProperties.Update(asteroidProperty);
-            context.SaveChanges();
-
-            return Ok($"asteroid {name} properties record updated in db");
         }
 
         [HttpDelete("asteroid/{name}", Name = "DeleteAsteroidByName")]
@@ -160,7 +163,7 @@ namespace SpaceObject.Controllers
         {
             try
             {
-                var item = context.asteroidItems.FirstOrDefault(c => c.name.Equals(name.ToLower()));
+                var item = context.asteroidItems.FirstOrDefault(c => c.Name.Equals(name.ToLower()));
                 if (item == null)
                 {
                     throw new Exception($"{name} no record in db");
@@ -173,7 +176,7 @@ namespace SpaceObject.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"internal server exception: \"{ex.Message}\"");
             }
         }
     }
