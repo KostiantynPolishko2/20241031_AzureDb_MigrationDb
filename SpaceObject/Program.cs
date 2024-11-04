@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<SpaceObjectContext>(configure => configure.UseSqlServer(builder.Configuration.GetConnectionString("LocalSqlDb_SpaceObject")));
+
 //builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddControllers(options =>
 {
