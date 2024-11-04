@@ -1,14 +1,17 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SpaceObject.DTO;
 using SpaceObject.EF;
 using SpaceObject.Entities;
+using SpaceObject.Roles;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceObject.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SpaceObjectController : ControllerBase
@@ -53,7 +56,7 @@ namespace SpaceObject.Controllers
 
                 if (item == null)
                 {
-                    throw new Exception($"AsteroidInfo of {name}  no records in db");
+                    throw new Exception($"AsteroidInfo of {name.ToLower()}  no records in db");
                 }
 
                 var asteroidItemDto = new AsteroidInfoDto(item.asteroidProperty) { Name = item.Name, Category = item.Type };
@@ -82,7 +85,7 @@ namespace SpaceObject.Controllers
 
                 if (asteroids_dto.Count() == 0)
                 {
-                    throw new Exception($"Asteroids with class {type} no records in db");
+                    throw new Exception($"Asteroids with class {type.ToLower()} no records in db");
                 }
 
                 return Ok(asteroids_dto);
@@ -93,6 +96,7 @@ namespace SpaceObject.Controllers
             }
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost("asteroid", Name = "PostAsteroid")]
         public IActionResult PostAsteroid([FromQuery] [Required] string name, string type, [FromBody] AsteroidProperty asteroidProperty)
         {
@@ -111,7 +115,7 @@ namespace SpaceObject.Controllers
                 context.asteroidProperties.Add(asteroidProperty);
                 context.SaveChanges();
 
-                return Ok($"asteroid {name}, class {type}, recorded to db");
+                return Ok($"asteroid {name.ToLower()}, class {type.ToLower()}, recorded to db");
             }
             catch (Exception ex)
             {
@@ -120,6 +124,7 @@ namespace SpaceObject.Controllers
 
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPatch("asteroid/{name}", Name = "PatchAsteroid")]
         public IActionResult PatchAsteroid([FromRoute][Required] string name, [FromBody] JsonPatchDocument<AsteroidProperty> patchDoc)
         {
@@ -134,7 +139,7 @@ namespace SpaceObject.Controllers
                 var asteroidProperty = asteroidItem!.asteroidProperty;
                 if (asteroidProperty == null)
                 {
-                    return NotFound($"asteroids' properties {name} no record in db");
+                    return NotFound($"asteroids' properties {name.ToLower()} no record in db");
                 }
 
                 // Apply the patch document to the asteroid
@@ -149,7 +154,7 @@ namespace SpaceObject.Controllers
                 context.asteroidProperties.Update(asteroidProperty);
                 context.SaveChanges();
 
-                return Ok($"asteroid {name} properties record updated in db");
+                return Ok($"asteroid {name.ToLower()} properties record updated in db");
             }
             catch (Exception ex)
             {
@@ -158,6 +163,7 @@ namespace SpaceObject.Controllers
 
         }
 
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpDelete("asteroid/{name}", Name = "DeleteAsteroidByName")]
         public IActionResult DeleteAsteroidByName([FromRoute] string name)
         {
@@ -166,13 +172,13 @@ namespace SpaceObject.Controllers
                 var item = context.asteroidItems.FirstOrDefault(c => c.Name.Equals(name.ToLower()));
                 if (item == null)
                 {
-                    throw new Exception($"{name} no record in db");
+                    throw new Exception($"{name.ToLower()} no record in db");
                 }
 
                 context.asteroidItems.Remove(item);
                 context.SaveChanges();
 
-                return Ok($"{name} deleted from db");
+                return Ok($"{name.ToLower()} deleted from db");
             }
             catch (Exception ex)
             {
