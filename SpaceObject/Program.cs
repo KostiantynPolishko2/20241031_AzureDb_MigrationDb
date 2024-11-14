@@ -5,7 +5,7 @@ using SpaceObject;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<SpaceObjectContext>(configure => configure.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlDb")));
+builder.Services.AddDbContext<SpaceObjectContext>(configure => configure.UseSqlServer(builder.Configuration.GetConnectionString("LocalSqlDb")));
 //builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddControllers(options =>
 {
